@@ -139,7 +139,6 @@ if __name__ == '__main__':
 
     outliers_col(df)
     df.boxplot(column='TIPOIM')
-    matplotlib.use('TkAgg')
-    plt.interactive(False)
+    plt.rcParams['figure.figsize'] = (10,10) 
     plt.show()
 
