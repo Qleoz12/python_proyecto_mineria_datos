@@ -34,3 +34,4 @@ def read_data_mysql(mes):
 
 if __name__ == '__main__':
     load_data()
+

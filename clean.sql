@@ -1,0 +1,12 @@
+delete from enero where NABAN !=1005901100
+delete from febrero where NABAN !=1005901100
+delete from marzo where NABAN !=1005901100
+delete from abril where NABAN !=1005901100
+delete from mayo where NABAN !=1005901100
+delete from junio where NABAN !=1005901100
+delete from julio where NABAN !=1005901100
+delete from agosto where NABAN !=1005901100
+delete from septiembre where NABAN !=1005901100
+delete from octubre where NABAN !=1005901100
+delete from noviembre where NABAN !=1005901100
+delete from diciembre where NABAN !=1005901100
