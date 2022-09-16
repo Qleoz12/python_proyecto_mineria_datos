@@ -1,3 +1,4 @@
+
 # This is a sample Python script.
 
 # Press Mayús+F10 to execute it or replace it with your code.
@@ -7,7 +8,7 @@ import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
 
-from loaddatatod_db import read_data_mysql
+from loaddatatod_db import read_data_mysql, red_data_sqlserver
 
 
 def inexistentes(df):
@@ -18,14 +19,44 @@ def inexistentes(df):
             df[columna].name, len(df[df[columna].isnull()]) / (1.0 * n_records), df[columna].dtype
         ))
 
+
+# Validacion de crecimiento de demanda por medio de los valores duplicados para lo cual tomamos los valores de FECH=Fecha_de_proceso, PAISGEN=Pais_origen
+# NABAM=Posición_arancelaria que es con la cual identificamos el tipo de producto y PAISPRO=Pais_productor, de modo que por medio de este vamos a saber
+# cual es el tipo que mas veces se importa de la misma procedencia identificando así los lugares de los cuales se empieza a depender mas para evaluar
+# el porque de esta procedencia con las de mas consultas
 def duplicados(df):
-    # Validacion de crecimiento de demanda por medio de los valores duplicados
 
-    df['Crecimiento_Demanda'] = df.FECH.astype(str).str.cat([df.PAISGEN.astype(str), df.NABAN.apply(str)], sep='-')
+    df['Crecimiento_Demanda'] = df.FECH.astype(str).str.cat([df.PAISGEN.astype(str), df.PAISPRO.astype(str),
+                                                             df.PAISCOM.astype(str), df.NABAN.apply(str)], sep='-')
     print(df)
-    print(df.Crecimiento_Demanda.value_counts())
-    print(df.Crecimiento_Demanda.value_counts(normalize=True).plot.barh());
 
+    # Listamos y Revisamos las colmunas que tengan alto numero de duplicados
+
+    print(df.Crecimiento_Demanda.value_counts())
+
+    # Revisamos variables en las que se encuentren gran cantidad de registros con el mismo valor
+
+    n_records = len(df)
+
+    def valores_duplicados_col(df):
+        for columna in df:
+            n_por_valor = df[columna].value_counts()
+            mas_comun = n_por_valor.iloc[0]
+            menos_comun = n_por_valor.iloc[-1]
+            print("{} | {}-{} | {}".format(
+                df[columna].name,
+                round(mas_comun / (1.0 * n_records), 3),
+                round(menos_comun / (1.0 * n_records), 3),
+                df[columna].dtype
+            ))
+
+    valores_duplicados_col(df)
+
+    # Graficamos el resltado de nuestra consulta
+
+    print(df.Crecimiento_Demanda.value_counts(normalize=True).plot.barh())
+
+#Creamos nuestra funcion para validar los valores inexistentes
 def inexistentes(df):
     n_records = len(df)
 
@@ -50,8 +81,8 @@ def outliers_col(df):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    # load_data()
-    df=read_data_mysql()
+
+    #    df=read_data_mysql()
     # print(df.values)
     # print(df.size)
     # print(df.describe())
@@ -121,24 +152,33 @@ if __name__ == '__main__':
     # print(df.duplicated('RZIMPO'))
 
 
-    df1 = df.groupby(['RZIMPO'])
-    print(df1)
+    #df1 = df.groupby(['RZIMPO'])
+    #print(df1)
     # df1['duplicate']=df1.RZIMPO.map(lambda x: get_close_matches(x, df1.RZIMPO, n=2,cutoff=0.8))\
     #           .apply(pd.Series)
     # print (df1['duplicate'])
-    print(df.dtypes)
+    #print(df.dtypes)
 
     # print(df1.modelo_unico.value_counts()
-    print(df.shape)
+    #print(df.shape)
     # print(inexistentes(df1))
     #fecha
-    print(df['PAISCOM'])
+    #print(df['PAISCOM'])
 
-    df['pedidos_unicos'] = df.FECH.astype(str).str.cat([df.PAISGEN.astype(str), df.PAISPRO.apply(str)], sep='-')
-    print(df)
+    #df['pedidos_unicos'] = df.FECH.astype(str).str.cat([df.PAISGEN.astype(str), df.PAISPRO.apply(str)], sep='-')
+    #print(df)
 
-    outliers_col(df)
-    df.boxplot(column='TIPOIM')
-    plt.rcParams['figure.figsize'] = (10,10) 
-    plt.show()
+    #outliers_col(df)
+    #df.boxplot(column='TIPOIM')
+    #matplotlib.use('TkAgg')
+    #plt.interactive(False)
+    #plt.show()
 
+
+## Esta es la validacion de los duplicados para calcular el crecimiento de demanda basados en el pais la fecha
+##
+
+
+    df = red_data_sqlserver()
+    duplicados(df)
+    inexistentes(df)
