@@ -46,5 +46,55 @@ def red_data_sqlserver():
     df = pd.read_sql(query, cnxn)
     return df
 
+def load_data_mongo():
+    try:
+        conn=conn_mongo()
+        db = conn.database
+
+        collection = db.my_gfg_collection
+
+        emp_rec1 = {
+            "name": "Mr.Geek",
+            "eid": 24,
+            "location": "delhi"
+        }
+        emp_rec2 = {
+            "name": "Mr.Shaurya",
+            "eid": 14,
+            "location": "delhi"
+        }
+
+        # Insert Data
+        rec_id1 = collection.insert_one(emp_rec1)
+        rec_id2 = collection.insert_one(emp_rec2)
+    except:
+        conn.close()
+
+def conn_mongo():
+    import pymongo
+
+    MONGODB_HOST = 'localhost'
+    MONGODB_PORT = '27017'
+    MONGODB_TIMEOUT = 1000
+
+    URI_CONNECTION = "mongodb://" + MONGODB_HOST + ":" + MONGODB_PORT + "/"
+
+    try:
+        client = pymongo.MongoClient(URI_CONNECTION)
+        client.server_info()
+        print('OK -- Connected to MongoDB at server %s' % (MONGODB_HOST))
+        # client.close()
+        return client
+    except pymongo.errors.ServerSelectionTimeoutError as error:
+        print('Error with MongoDB connection: %s' % error)
+    except pymongo.errors.ConnectionFailure as error:
+        print('Could not connect to MongoDB: %s' % error)
+
+
+
+
+
+
 if __name__ == '__main__':
-    load_data()
+    # load_data()
+    load_data_mongo()
