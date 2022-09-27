@@ -46,28 +46,20 @@ def red_data_sqlserver():
     df = pd.read_sql(query, cnxn)
     return df
 
-def load_data_mongo():
+def load_data_mongo(_dict, collection):
     try:
         conn=conn_mongo()
         db = conn.database
 
-        collection = db.my_gfg_collection
 
-        emp_rec1 = {
-            "name": "Mr.Geek",
-            "eid": 24,
-            "location": "delhi"
-        }
-        emp_rec2 = {
-            "name": "Mr.Shaurya",
-            "eid": 14,
-            "location": "delhi"
-        }
+
 
         # Insert Data
-        rec_id1 = collection.insert_one(emp_rec1)
-        rec_id2 = collection.insert_one(emp_rec2)
-    except:
+        rec_id1 = db[collection].insert_one(_dict)
+
+
+    except Exception as  e:
+        print(e)
         conn.close()
 
 def conn_mongo():
@@ -97,4 +89,11 @@ def conn_mongo():
 
 if __name__ == '__main__':
     # load_data()
-    load_data_mongo()
+    emp_rec2 = {
+        "name": "Mr.Shaurya",
+        "eid": 14,
+        "location": "delhi"
+    }
+    load_data_mongo(emp_rec2,"my_gfg_collection")
+
+    load_data_mongo(emp_rec2, "test")
