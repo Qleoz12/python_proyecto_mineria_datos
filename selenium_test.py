@@ -1,24 +1,14 @@
 # librerias e importes
 
-import glob
-
-import pyautogui as pyautogui
-from selenium import webdriver
-import sys
-
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-import time
-import pandas as pd
-from datetime import date
-from datetime import datetime
-from datetime import timedelta
 import locale
 import os
+import sys
+import time
 
-from bot_BBDDM.py.Utils import monthToNum
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+
+from loaddatatod_db import load_data_mongo
 
 locale.setlocale(locale.LC_ALL, ("es_ES", "UTF-8"))
 
@@ -51,7 +41,7 @@ except OSError as e:
     sys.exit("Can't create {dir}: {err}".format(dir=directory, err=e))
 
 
-driver_path = '..\\driver_selenium\\105_chromedriver.exe'
+driver_path = 'driver_selenium\\105_chromedriver.exe'
 
 driver = webdriver.Chrome(driver_path, chrome_options=options)
 
@@ -101,33 +91,38 @@ def check_exists_by_xpath(element, xpath):
     return True
 
 if __name__ == '__main__':
-    # Funciones BOT
 
-    # driver.find_element_by_id("email").send_keys("laika.reporting@cos.com.co")
-    # time.sleep(2)
-    # driver.find_element_by_id("submitBtn").click()
-    # time.sleep(2)
     try:
 
-
-        # path = "//*[@id='formulaBarTextDivId_textElement']"
-        # html_source = driver.page_source
-        # print(html_source)
-        # selector="#pvExplorationHost > div > div > exploration > div > explore-canvas > div > div.canvasFlexBox > div > div.displayArea.disableAnimations.actualSizeAlignCenter.actualSizeAlignMiddle.actualSizeCentered > div.visualContainerHost.visualContainerOutOfFocus > visual-container-repeat > visual-container:nth-child(7) > transform > div > div.visualContent > div > visual-modern > div > div > div.tableEx.showFocus > div.innerContainer > div.bodyCells > div > div:nth-child(1) > div:nth-child(1)\")"
-        # something=driver.find_element(By.cssSelector(selector))
-        users = driver.find_elements_by_xpath("//div[@class='innerContainer']/div[@class='bodyCells']/div/div")
-        # print(len(users))  # check it must be 12
-        # find_elements_by_xpath("//p/span[@class='gray text-a4']").
-        counter = 1
-        # users.click()
+        titles_xpath = "//div[@class='tableExContainer']/div[@class='tableEx']/div[@class='innerContainer']/div[@class='columnHeaders']/div/div"
+        titles= driver.find_elements("xpath",titles_xpath)
+        users = driver.find_elements("xpath","//div[@class='innerContainer']/div[@class='bodyCells']/div/div")
 
 
+
+        list=[]
+        # print(users)
+        for y in users:
+            item = dict()
+            # print(y.text)
+            cells=y.text.split("\n")
+            acumulator=0
+            for x in titles:
+                # print(x.text)
+                item[x.text]=cells[acumulator]
+                list.append(item)
+                acumulator+=1
+
+            load_data_mongo(item, "scrap")
         # Cerrar navegador
+
+
+        print(list)
     except Exception as  e:
        print(e)
 
-    driver.close()
-    # Finalizar proceso Selenium
-    driver.quit()
-    sys.exit()
+    finally:
+       driver.close()
+       driver.quit()
+       sys.exit()
 

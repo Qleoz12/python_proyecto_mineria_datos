@@ -50,10 +50,6 @@ def load_data_mongo(_dict, collection):
     try:
         conn=conn_mongo()
         db = conn.database
-
-
-
-
         # Insert Data
         rec_id1 = db[collection].insert_one(_dict)
 
