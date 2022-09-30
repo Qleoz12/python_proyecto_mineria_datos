@@ -1,6 +1,7 @@
 import csv
 import glob
 from difflib import get_close_matches
+from typing import final
 
 import numpy as np
 import pandas as pd
@@ -45,6 +46,21 @@ def red_data_sqlserver():
     query = "SELECT TOP (1000) *  FROM [Import2016].[dbo].[Abril$];"
     df = pd.read_sql(query, cnxn)
     return df
+
+
+def red_data_mongo(database, colletion,query):
+    try:
+        conn=conn_mongo()
+
+        db = conn[database]
+        return db[colletion].find()
+
+    except Exception as  e:
+        print(e)
+        conn.close()
+
+
+
 
 def load_data_mongo(_dict, collection):
     try:
@@ -93,3 +109,8 @@ if __name__ == '__main__':
     load_data_mongo(emp_rec2,"my_gfg_collection")
 
     load_data_mongo(emp_rec2, "test")
+
+    data=red_data_mongo("database","scrap","{}")
+
+    for x in data:
+        print(x)
