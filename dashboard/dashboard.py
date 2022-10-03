@@ -1,6 +1,6 @@
 import json
 
-from dash import dcc, Output, Input
+from dash import dcc, Output, Input, dash_table
 import dash_html_components as html
 import plotly.express as px
 from dash import dash
@@ -22,9 +22,21 @@ class  dashboard():
         result=list(cs)
 
         if result:
-            return result[0][column]
+            return float(result[0][column].replace(",","."))
         else:
-            return []
+            return 0
+
+    def generate_table(self,dataframe, max_rows=10):
+        return html.Table([
+            html.Thead(
+                html.Tr([html.Th(col) for col in dataframe.columns])
+            ),
+            html.Tbody([
+                html.Tr([
+                    html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+                ]) for i in range(min(len(dataframe), max_rows))
+            ])
+        ])
 
     def dash_on(self):
         with open('departments.json', encoding='UTF-8') as f:
@@ -32,14 +44,14 @@ class  dashboard():
 
         import plotly.graph_objects as go
 
-        for tile in data['features']:
-            print(tile['properties']['NOMBRE_DPT'])
-            print(tile['properties']['DPTO'])
+        # for tile in data['features']:
+        #     print(tile['properties']['NOMBRE_DPT'])
+        #     print(tile['properties']['DPTO'])
 
-        data2 = red_data_mongo("database", "scrap", {})
-
-        for x in data2:
-            print(x)
+        # data2 = red_data_mongo("database", "scrap", {})
+        #
+        # for x in data2:
+        #     print(x)
 
         list1 = ["05", "08", "11", "13", "15", "17", "18", "19", "20", "23", "25", "27", "41", "44", "47",
                  "50", "52", "54", "63", "66", "68", "70", "73", "76", "81", "85", "86", "91", "94", "95", "97", "99",
@@ -77,7 +89,7 @@ class  dashboard():
             hover_name="Name",
             center=dict(lat=4.570868, lon=-74.2973328),
             basemap_visible=True,
-            size="DPTO"
+            size="PRODUCCION"
             # projection='eckert4'
             # lat="Latitude",
             # lon="Longitude",
@@ -97,13 +109,33 @@ class  dashboard():
         )
 
         app = dash.Dash(__name__)
-        app.layout = html.Div(style={'textAlign': 'Center'}, children=[
 
-            dcc.Graph(
-                style={"height": "100vh"},
-                figure=fig,
-            )
-        ])
+        _table=app.layout = dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns])
+        app.layout =html.Div(
+            children=[
+                html.Div(style={'textAlign': 'Center'}, children=[
+
+                    dcc.Graph(
+                        style={"height": "50vh"},
+                        figure=fig,
+                    )
+                ]),
+                html.Div(style={'textAlign': 'Center'}, children=[
+
+
+                   self.generate_table(df),
+
+                ]),
+
+            ],
+            className="wrapper",
+        )
+
+
+
+
+
+
 
 
 

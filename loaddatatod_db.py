@@ -86,7 +86,7 @@ def conn_mongo():
     try:
         client = pymongo.MongoClient(URI_CONNECTION)
         client.server_info()
-        print('OK -- Connected to MongoDB at server %s' % (MONGODB_HOST))
+        # print('OK -- Connected to MongoDB at server %s' % (MONGODB_HOST))
         # client.close()
         return client
     except pymongo.errors.ServerSelectionTimeoutError as error:
