@@ -5,6 +5,7 @@ import os
 import sys
 import time
 
+import unidecode as unidecode
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
@@ -109,7 +110,7 @@ if __name__ == '__main__':
             acumulator=0
             for x in titles:
                 # print(x.text)
-                item[x.text]=cells[acumulator]
+                item[x.text]=unidecode.unidecode(cells[acumulator])
                 list.append(item)
                 acumulator+=1
 
