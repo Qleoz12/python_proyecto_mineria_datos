@@ -51,9 +51,9 @@ def red_data_sqlserver():
 def red_data_mongo(database, colletion,query):
     try:
         conn=conn_mongo()
-
         db = conn[database]
-        return db[colletion].find()
+        cs=db[colletion].find(query)
+        return cs
 
     except Exception as  e:
         print(e)
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
     load_data_mongo(emp_rec2, "test")
 
-    data=red_data_mongo("database","scrap","{}")
+    data=red_data_mongo("database","scrap",{'DEPARTAMENTO':'Antioquia'})
 
     for x in data:
         print(x)
