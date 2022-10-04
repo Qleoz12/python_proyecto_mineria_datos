@@ -26,19 +26,37 @@ class  dashboard():
         else:
             return 0
 
-    def generate_table(self,dataframe, max_rows=10):
-        return html.Table([
-            html.Thead(
-                html.Tr([html.Th(col) for col in dataframe.columns])
-            ),
-            html.Tbody([
-                html.Tr([
-                    html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-                ]) for i in range(min(len(dataframe), max_rows))
-            ])
-        ])
+    def generate_table(self,dataframe, page_size=10):
+        # return html.Table([
+        #     html.Thead(
+        #         html.Tr([html.Th(col) for col in dataframe.columns])
+        #     ),
+        #     html.Tbody([
+        #         html.Tr([
+        #             html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+        #         ]) for i in range(min(len(dataframe), max_rows))
+        #     ])
+        # ])
+        return dash_table.DataTable(
+            id='dataTable',
+            columns=[{
+                "name": i,
+                "id": i
+            } for i in dataframe.columns],
+            data=dataframe.to_dict('records'),
+            page_action="native",
+            page_current=0,
+            page_size=page_size,
+        )
 
     def dash_on(self):
+        external_stylesheets = [
+            {
+                "href": "https://fonts.googleapis.com/css2?"
+                        "family=Lato:wght@400;700&display=swap",
+                "rel": "stylesheet",
+            },]
+
         with open('departments.json', encoding='UTF-8') as f:
             data = json.load(f)
 
@@ -95,6 +113,21 @@ class  dashboard():
             # lon="Longitude",
         )
 
+        fig_imports = px.scatter_geo(
+            df,
+            locations="id",
+            geojson=data,
+            color="DPTO",
+            featureidkey="properties.DPTO",
+            hover_name="Name",
+            center=dict(lat=4.570868, lon=-74.2973328),
+            basemap_visible=True,
+            size="PRODUCCION"
+            # projection='eckert4'
+            # lat="Latitude",
+            # lon="Longitude",
+        )
+
         fig.update_layout(
             autosize=True,
             height=600,
@@ -108,23 +141,60 @@ class  dashboard():
             )
         )
 
-        app = dash.Dash(__name__)
+        fig_imports.update_layout(
+            autosize=True,
+            height=600,
+            geo=dict(
+                center=dict(
+                    lat=4.570868,
+                    lon=-74.2973328
+                ),
+                scope='south america',
+                projection_scale=6
+            )
+        )
+
+        app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
 
         _table=app.layout = dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns])
         app.layout =html.Div(
             children=[
+                html.Div(
+                children=[
+                    html.P(children="🌽", className="header-emoji"),
+                    html.H1(
+                        children="Colombian Corn Analytics", className="header-title"
+                    ),
+                    html.P(
+                        children="Analyze the behavior of Corn prices"
+                                 " and the number of corn imports vs own prodcttion"
+                                 " between 2016 and 2021",
+                        className="header-description",
+                    ),
+                    html.P(children="🌽", className="header-emoji"),
+                ],
+                    className="header",
+                ),
                 html.Div(style={'textAlign': 'Center'}, children=[
-
+                    html.P(children="production", className="header-title"),
                     dcc.Graph(
                         style={"height": "50vh"},
                         figure=fig,
                     )
                 ]),
+
                 html.Div(style={'textAlign': 'Center'}, children=[
 
 
                    self.generate_table(df),
 
+                ]),
+                html.Div(style={'textAlign': 'Center'}, children=[
+                    html.P(children="importations", className="header-title"),
+                    dcc.Graph(
+                        style={"height": "50vh"},
+                        figure=fig_imports,
+                    )
                 ]),
 
             ],
