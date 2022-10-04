@@ -8,13 +8,13 @@ import time
 import unidecode as unidecode
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-
+from selenium.webdriver.support.ui import Select
 from loaddatatod_db import load_data_mongo
 
 locale.setlocale(locale.LC_ALL, ("es_ES", "UTF-8"))
 
 
-directory="D:\\ETL\\"
+directory="C:\\Nueva carpeta\\python_proyecto_mineria_datos"
 
 # time.sleep(10)
 
@@ -98,12 +98,19 @@ if __name__ == '__main__':
         titles_xpath = "//div[@class='tableExContainer']/div[@class='tableEx']/div[@class='innerContainer']/div[@class='columnHeaders']/div/div"
         titles= driver.find_elements("xpath",titles_xpath)
         users = driver.find_elements("xpath","//div[@class='innerContainer']/div[@class='bodyCells']/div/div")
+        combobox = driver.find_element("xpath","//*[@id='pvExplorationHost']/div/div/exploration/div/explore-canvas/div/div[2]/div/div[2]/div[2]/visual-container-repeat/visual-container[6]/transform/div/div[2]/div/visual-modern/div/div/div[2]/div/i")
+        combobox.click()
+        years = driver.find_elements("xpath","//*[@id='slicer-dropdown-popup-5f2ab7f5-c6f0-ede3-bd22-b859efb6642a']/div[1]/div/div[2]")
 
+        for n_year in years:
+
+            print(n_year.text)
 
 
         list=[]
         # print(users)
         for y in users:
+            #drop.select_by_visible_text("2019")
             item = dict()
             # print(y.text)
             cells=y.text.split("\n")
