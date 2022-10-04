@@ -100,10 +100,12 @@ if __name__ == '__main__':
         users = driver.find_elements("xpath","//div[@class='innerContainer']/div[@class='bodyCells']/div/div")
         combobox = driver.find_element("xpath","//*[@id='pvExplorationHost']/div/div/exploration/div/explore-canvas/div/div[2]/div/div[2]/div[2]/visual-container-repeat/visual-container[6]/transform/div/div[2]/div/visual-modern/div/div/div[2]/div/i")
         combobox.click()
-        years = driver.find_elements("xpath","//*[@id='slicer-dropdown-popup-5f2ab7f5-c6f0-ede3-bd22-b859efb6642a']/div[1]/div/div[2]")
+        time.sleep(5)
+        years = driver.find_elements("xpath","//div[@class='slicer-dropdown-content']/div[@class='slicerContainer isMultiSelectEnabled']/div[@class='slicerBody']/div[@class='scroll-wrapper scrollbar-inner']/div[@class='scrollbar-inner scroll-content scroll-scrolly_visible']/div[@class='scrollRegion']/div[@class='visibleGroup']/div[@class='row']")
+
 
         for n_year in years:
-
+            n_year.click()
             print(n_year.text)
 
 
