@@ -91,6 +91,23 @@ def check_exists_by_xpath(element, xpath):
         return False
     return True
 
+
+def dataMongo(users):
+    list = []
+    print(users)
+    for y in users:
+        item = dict()
+        # print(y.text)
+        cells = y.text.split("\n")
+        acumulator = 0
+    for x in titles:
+        # print(x.text)
+        item[x.text] = unidecode.unidecode(cells[acumulator])
+        list.append(item)
+        acumulator += 1
+
+        load_data_mongo(item, "scrap")
+        # Cerrar navegador
 if __name__ == '__main__':
 
     try:
@@ -103,28 +120,26 @@ if __name__ == '__main__':
         time.sleep(5)
         years = driver.find_elements("xpath","//div[@class='slicer-dropdown-content']/div[@class='slicerContainer isMultiSelectEnabled']/div[@class='slicerBody']/div[@class='scroll-wrapper scrollbar-inner']/div[@class='scrollbar-inner scroll-content scroll-scrolly_visible']/div[@class='scrollRegion']/div[@class='visibleGroup']/div[@class='row']")
 
+        x_ant=None
+        x_act=None
+        #for i; i>=n_year in years:
+        for i, x in enumerate(years):
+            #if i==0:
+             #   x_act=x.click()
+            #print(i, x.text)
 
-        for n_year in years:
-            n_year.click()
-            print(n_year.text)
+            x_ant=x
+            x_ant=x.click()
+            time.sleep(5)
+            dataMongo(users)
+            x_act=x
+            x_act=x.click()
+
+            #x_act=n_year.click()
+            #x_ant=
+            #print(n_year.text)
 
 
-        list=[]
-        # print(users)
-        for y in users:
-            #drop.select_by_visible_text("2019")
-            item = dict()
-            # print(y.text)
-            cells=y.text.split("\n")
-            acumulator=0
-            for x in titles:
-                # print(x.text)
-                item[x.text]=unidecode.unidecode(cells[acumulator])
-                list.append(item)
-                acumulator+=1
-
-            load_data_mongo(item, "scrap")
-        # Cerrar navegador
 
 
         print(list)
