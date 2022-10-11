@@ -5,11 +5,14 @@ import os
 import sys
 import time
 
+import js as js
 import unidecode as unidecode
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import Select
 from loaddatatod_db import load_data_mongo
+
 
 locale.setlocale(locale.LC_ALL, ("es_ES", "UTF-8"))
 
@@ -60,7 +63,6 @@ driver.get('https://app.powerbi.com/view?r=eyJrIjoiOTk3NDZhYTMtZjg5NC00OWIxLWE3N
 time.sleep(4)
 
 
-
 def getDownLoadedFileName(waitTime):
     driver.execute_script("window.open()")
     # switch to new tab
@@ -90,24 +92,56 @@ def check_exists_by_xpath(element, xpath):
     except NoSuchElementException:
         return False
     return True
+def iterate(xpath_menu_one_row):
+    years = driver.find_elements("xpath",xpath_menu_one_row)
 
+    x_ant = None
+    x_act = None
+    for i, x in enumerate(years):
 
-def dataMongo(users):
-    list = []
-    print(users)
-    for y in users:
-        item = dict()
-        # print(y.text)
-        cells = y.text.split("\n")
-        acumulator = 0
-    for x in titles:
-        # print(x.text)
-        item[x.text] = unidecode.unidecode(cells[acumulator])
-        list.append(item)
-        acumulator += 1
+        print(i, x.text)
 
-        load_data_mongo(item, "scrap")
-        # Cerrar navegador
+        x_ant = x
+        x_ant = x.click()
+        time.sleep(0.5)
+        # dataMongo(users)
+        x_act = x
+        x_act = x.click()
+
+    time.sleep(3)
+    years = driver.find_elements("xpath", xpath_menu_one_row)
+    years[11].location_once_scrolled_into_view
+
+    time.sleep(3)
+    years = driver.find_elements("xpath",xpath_menu_one_row)
+
+    for i, x in enumerate(years):
+        print(i, x.text)
+        x_ant = x
+        x_ant = x.click()
+        time.sleep(0.5)
+        # dataMongo(users)
+        x_act = x
+        x_act = x.click()
+
+    time.sleep(5)
+def last_item_uncheked(xpath_menu_one_row):
+    years = driver.find_elements("xpath", xpath_menu_one_row)
+    time.sleep(5)
+    years[11].location_once_scrolled_into_view
+    #time.sleep(3)
+    #years[13].location_once_scrolled_into_view
+    years = driver.find_elements("xpath", xpath_menu_one_row)
+    #years.click()
+    #time.sleep(3)
+    for i, x in enumerate(years):
+        print(i, x.text)
+        if x.text == '2021':
+            x.click()
+    years = driver.find_elements("xpath", xpath_menu_one_row)
+    years[1].location_once_scrolled_into_view
+    years[1].location_once_scrolled_into_view
+    time.sleep(5)
 if __name__ == '__main__':
 
     try:
@@ -118,36 +152,36 @@ if __name__ == '__main__':
         combobox = driver.find_element("xpath","//*[@id='pvExplorationHost']/div/div/exploration/div/explore-canvas/div/div[2]/div/div[2]/div[2]/visual-container-repeat/visual-container[6]/transform/div/div[2]/div/visual-modern/div/div/div[2]/div/i")
         combobox.click()
         time.sleep(5)
-        years = driver.find_elements("xpath","//div[@class='slicer-dropdown-content']/div[@class='slicerContainer isMultiSelectEnabled']/div[@class='slicerBody']/div[@class='scroll-wrapper scrollbar-inner']/div[@class='scrollbar-inner scroll-content scroll-scrolly_visible']/div[@class='scrollRegion']/div[@class='visibleGroup']/div[@class='row']")
+        xpath_menu_anos="//div[@class='slicer-dropdown-content']/div[@class='slicerContainer isMultiSelectEnabled']/div[@class='slicerBody']/div[@class='scroll-wrapper scrollbar-inner']/div[@class='scrollbar-inner scroll-content scroll-scrolly_visible']/div[@class='scrollRegion']/div[@class='visibleGroup']/div[@class='row']"
+        last_item_uncheked(xpath_menu_anos)
+        time.sleep(3)
+        iterate(xpath_menu_anos)
 
-        x_ant=None
-        x_act=None
-        #for i; i>=n_year in years:
-        for i, x in enumerate(years):
-            #if i==0:
-             #   x_act=x.click()
-            #print(i, x.text)
-
-            x_ant=x
-            x_ant=x.click()
-            time.sleep(5)
-            dataMongo(users)
-            x_act=x
-            x_act=x.click()
-
-            #x_act=n_year.click()
-            #x_ant=
-            #print(n_year.text)
+        time.sleep(5)
 
 
 
-
+        #def dataMongo(users):
+        # list = []
+        # # print(users)
+        # for y in users:
+        #     # drop.select_by_visible_text("2019")
+        #     item = dict()
+        #     # print(y.text)
+        #     cells = y.text.split("\n")
+        #     acumulator = 0
+        #     for x in titles:
+        #         # print(x.text)
+        #         item[x.text] = unidecode.unidecode(cells[acumulator])
+        #         list.append(item)
+        #         acumulator += 1
+        #     load_data_mongo(item, "scrap")
+        # Cerrar navegador
         print(list)
-    except Exception as  e:
-       print(e)
-
+    except Exception as e:
+        print(e)
     finally:
-       driver.close()
-       driver.quit()
-       sys.exit()
+        driver.close()
+        driver.quit()
+        sys.exit()
 
