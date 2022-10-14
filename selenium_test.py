@@ -139,9 +139,15 @@ def last_item_uncheked(xpath_menu_one_row):
         if x.text == '2021':
             x.click()
     years = driver.find_elements("xpath", xpath_menu_one_row)
+    #driver.execute_script("return arguments[0].scrollIntoView(true);", years)
+    #driver.execute_script("arguments[0].scrollIntoView()", years)
+    #driver.execute_script("scroll(0, 0);")
+    #driver.execute_script("window.scrollTo(0,document.body.scrollHeight);", years)
     years[1].location_once_scrolled_into_view
-    years[1].location_once_scrolled_into_view
-    time.sleep(5)
+    time.sleep(3)
+
+
+time.sleep(5)
 if __name__ == '__main__':
 
     try:
