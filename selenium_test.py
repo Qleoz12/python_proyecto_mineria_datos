@@ -92,6 +92,23 @@ def check_exists_by_xpath(element, xpath):
     except NoSuchElementException:
         return False
     return True
+def dataMongo(users):
+        list = []
+            #print(users)
+        for y in users:
+             # drop.select_by_visible_text("2019")
+             item = dict()
+             # print(y.text)
+             cells = y.text.split("\n")
+             acumulator = 0
+             for x in titles:
+                 # print(x.text)
+                 item[x.text] = unidecode.unidecode(cells[acumulator])
+                 list.append(item)
+                 acumulator += 1
+             load_data_mongo(item, "scrap")
+        #Cerrar navegador
+        print(list)
 def iterate(xpath_menu_one_row):
     years = driver.find_elements("xpath",xpath_menu_one_row)
 
@@ -103,8 +120,10 @@ def iterate(xpath_menu_one_row):
 
         x_ant = x
         x_ant = x.click()
-        time.sleep(0.5)
-        # dataMongo(users)
+        time.sleep(3)
+        users = driver.find_elements("xpath", "//div[@class='innerContainer']/div[@class='bodyCells']/div/div")
+        dataMongo(users)
+        #time.sleep(3)
         x_act = x
         x_act = x.click()
 
@@ -125,26 +144,26 @@ def iterate(xpath_menu_one_row):
         x_act = x.click()
 
     time.sleep(5)
-def last_item_uncheked(xpath_menu_one_row):
-    years = driver.find_elements("xpath", xpath_menu_one_row)
-    time.sleep(5)
-    years[11].location_once_scrolled_into_view
+#def last_item_uncheked(xpath_menu_one_row):
+    #years = driver.find_elements("xpath", xpath_menu_one_row)
+    #time.sleep(5)
+    #years[11].location_once_scrolled_into_view
     #time.sleep(3)
     #years[13].location_once_scrolled_into_view
-    years = driver.find_elements("xpath", xpath_menu_one_row)
+    #years = driver.find_elements("xpath", xpath_menu_one_row)
     #years.click()
     #time.sleep(3)
-    for i, x in enumerate(years):
-        print(i, x.text)
-        if x.text == '2021':
-            x.click()
-    years = driver.find_elements("xpath", xpath_menu_one_row)
+    #for i, x in enumerate(years):
+    #    print(i, x.text)
+    #    if x.text == '2021':
+    #        x.click()
+    #years = driver.find_elements("xpath", "//div[@class='slicer-dropdown-content']/div[@class='slicerContainer isMultiSelectEnabled']/div[@class='slicerBody']/div[@class='scroll-wrapper scrollbar-inner']/div[@class='scrollbar-inner scroll-content scroll-scrolly_visible']/div[@class='scrollRegion']/div[@class='visibleGroup']/div[@class='row']")
     #driver.execute_script("return arguments[0].scrollIntoView(true);", years)
     #driver.execute_script("arguments[0].scrollIntoView()", years)
     #driver.execute_script("scroll(0, 0);")
     #driver.execute_script("window.scrollTo(0,document.body.scrollHeight);", years)
-    years[1].location_once_scrolled_into_view
-    time.sleep(3)
+    #years[0].location_once_scrolled_into_view
+    #time.sleep(3)
 
 
 time.sleep(5)
@@ -157,33 +176,17 @@ if __name__ == '__main__':
         users = driver.find_elements("xpath","//div[@class='innerContainer']/div[@class='bodyCells']/div/div")
         combobox = driver.find_element("xpath","//*[@id='pvExplorationHost']/div/div/exploration/div/explore-canvas/div/div[2]/div/div[2]/div[2]/visual-container-repeat/visual-container[6]/transform/div/div[2]/div/visual-modern/div/div/div[2]/div/i")
         combobox.click()
-        time.sleep(5)
+        #time.sleep(5)
         xpath_menu_anos="//div[@class='slicer-dropdown-content']/div[@class='slicerContainer isMultiSelectEnabled']/div[@class='slicerBody']/div[@class='scroll-wrapper scrollbar-inner']/div[@class='scrollbar-inner scroll-content scroll-scrolly_visible']/div[@class='scrollRegion']/div[@class='visibleGroup']/div[@class='row']"
-        last_item_uncheked(xpath_menu_anos)
+        #last_item_uncheked(xpath_menu_anos)
         time.sleep(3)
         iterate(xpath_menu_anos)
 
-        time.sleep(5)
+        #time.sleep(5)
 
 
 
-        #def dataMongo(users):
-        # list = []
-        # # print(users)
-        # for y in users:
-        #     # drop.select_by_visible_text("2019")
-        #     item = dict()
-        #     # print(y.text)
-        #     cells = y.text.split("\n")
-        #     acumulator = 0
-        #     for x in titles:
-        #         # print(x.text)
-        #         item[x.text] = unidecode.unidecode(cells[acumulator])
-        #         list.append(item)
-        #         acumulator += 1
-        #     load_data_mongo(item, "scrap")
-        # Cerrar navegador
-        print(list)
+
     except Exception as e:
         print(e)
     finally:
