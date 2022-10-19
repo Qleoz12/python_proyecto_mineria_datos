@@ -16,7 +16,7 @@ from loaddatatod_db import load_data_mongo
 locale.setlocale(locale.LC_ALL, ("es_ES", "UTF-8"))
 
 
-directory="D:\\ETL\\"
+directory="C:\\Nueva carpeta\\python_proyecto_mineria_datos"
 
 # time.sleep(10)
 
@@ -131,7 +131,7 @@ def iterate(xpath_menu_one_row):
         titles_xpath = "//div[@class='tableExContainer']/div[@class='tableEx']/div[@class='innerContainer']/div[@class='columnHeaders']/div/div"
         titles = driver.find_elements("xpath", titles_xpath)
         dataMongo(users,titles,x.text)
-        #time.sleep(3)
+        time.sleep(3)
         x_act = x
         x_act = x.click()
 
@@ -146,8 +146,12 @@ def iterate(xpath_menu_one_row):
         print(i, x.text)
         x_ant = x
         x_ant = x.click()
-        time.sleep(0.5)
-        # dataMongo(users)
+        time.sleep(3)
+        users = driver.find_elements("xpath", "//div[@class='innerContainer']/div[@class='bodyCells']/div/div")
+        titles_xpath = "//div[@class='tableExContainer']/div[@class='tableEx']/div[@class='innerContainer']/div[@class='columnHeaders']/div/div"
+        titles = driver.find_elements("xpath", titles_xpath)
+        dataMongo(users, titles, x.text)
+        time.sleep(3)
         x_act = x
         x_act = x.click()
 
