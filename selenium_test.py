@@ -131,7 +131,7 @@ def iterate(xpath_menu_one_row):
         titles_xpath = "//div[@class='tableExContainer']/div[@class='tableEx']/div[@class='innerContainer']/div[@class='columnHeaders']/div/div"
         titles = driver.find_elements("xpath", titles_xpath)
         dataMongo(users,titles,x.text)
-        time.sleep(3)
+        time.sleep(1)
         x_act = x
         x_act = x.click()
 
@@ -151,34 +151,11 @@ def iterate(xpath_menu_one_row):
         titles_xpath = "//div[@class='tableExContainer']/div[@class='tableEx']/div[@class='innerContainer']/div[@class='columnHeaders']/div/div"
         titles = driver.find_elements("xpath", titles_xpath)
         dataMongo(users, titles, x.text)
-        time.sleep(3)
+        time.sleep(1)
         x_act = x
         x_act = x.click()
 
     time.sleep(5)
-#def last_item_uncheked(xpath_menu_one_row):
-    #years = driver.find_elements("xpath", xpath_menu_one_row)
-    #time.sleep(5)
-    #years[11].location_once_scrolled_into_view
-    #time.sleep(3)
-    #years[13].location_once_scrolled_into_view
-    #years = driver.find_elements("xpath", xpath_menu_one_row)
-    #years.click()
-    #time.sleep(3)
-    #for i, x in enumerate(years):
-    #    print(i, x.text)
-    #    if x.text == '2021':
-    #        x.click()
-    #years = driver.find_elements("xpath", "//div[@class='slicer-dropdown-content']/div[@class='slicerContainer isMultiSelectEnabled']/div[@class='slicerBody']/div[@class='scroll-wrapper scrollbar-inner']/div[@class='scrollbar-inner scroll-content scroll-scrolly_visible']/div[@class='scrollRegion']/div[@class='visibleGroup']/div[@class='row']")
-    #driver.execute_script("return arguments[0].scrollIntoView(true);", years)
-    #driver.execute_script("arguments[0].scrollIntoView()", years)
-    #driver.execute_script("scroll(0, 0);")
-    #driver.execute_script("window.scrollTo(0,document.body.scrollHeight);", years)
-    #years[0].location_once_scrolled_into_view
-    #time.sleep(3)
-
-
-time.sleep(5)
 if __name__ == '__main__':
 
     try:
@@ -188,16 +165,9 @@ if __name__ == '__main__':
         users = driver.find_elements("xpath","//div[@class='innerContainer']/div[@class='bodyCells']/div/div")
         combobox = driver.find_element("xpath","//*[@id='pvExplorationHost']/div/div/exploration/div/explore-canvas/div/div[2]/div/div[2]/div[2]/visual-container-repeat/visual-container[6]/transform/div/div[2]/div/visual-modern/div/div/div[2]/div/i")
         combobox.click()
-        #time.sleep(5)
         xpath_menu_anos="//div[@class='slicer-dropdown-content']/div[@class='slicerContainer isMultiSelectEnabled']/div[@class='slicerBody']/div[@class='scroll-wrapper scrollbar-inner']/div[@class='scrollbar-inner scroll-content scroll-scrolly_visible']/div[@class='scrollRegion']/div[@class='visibleGroup']/div[@class='row']"
-        #last_item_uncheked(xpath_menu_anos)
         time.sleep(3)
         iterate(xpath_menu_anos)
-
-        #time.sleep(5)
-
-
-
 
     except Exception as e:
         print(e)
