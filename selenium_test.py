@@ -5,7 +5,6 @@ import os
 import sys
 import time
 
-import js as js
 import unidecode as unidecode
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
@@ -17,7 +16,7 @@ from loaddatatod_db import load_data_mongo
 locale.setlocale(locale.LC_ALL, ("es_ES", "UTF-8"))
 
 
-directory="C:\\Nueva carpeta\\python_proyecto_mineria_datos"
+directory="D:\\ETL\\"
 
 # time.sleep(10)
 
@@ -92,7 +91,9 @@ def check_exists_by_xpath(element, xpath):
     except NoSuchElementException:
         return False
     return True
-def dataMongo(users):
+
+
+def dataMongo(users,titles,ano):
         list = []
             #print(users)
         for y in users:
@@ -106,9 +107,14 @@ def dataMongo(users):
                  item[x.text] = unidecode.unidecode(cells[acumulator])
                  list.append(item)
                  acumulator += 1
+
+             item['año']=ano
              load_data_mongo(item, "scrap")
         #Cerrar navegador
         print(list)
+
+
+
 def iterate(xpath_menu_one_row):
     years = driver.find_elements("xpath",xpath_menu_one_row)
 
@@ -122,7 +128,9 @@ def iterate(xpath_menu_one_row):
         x_ant = x.click()
         time.sleep(3)
         users = driver.find_elements("xpath", "//div[@class='innerContainer']/div[@class='bodyCells']/div/div")
-        dataMongo(users)
+        titles_xpath = "//div[@class='tableExContainer']/div[@class='tableEx']/div[@class='innerContainer']/div[@class='columnHeaders']/div/div"
+        titles = driver.find_elements("xpath", titles_xpath)
+        dataMongo(users,titles,x.text)
         #time.sleep(3)
         x_act = x
         x_act = x.click()
