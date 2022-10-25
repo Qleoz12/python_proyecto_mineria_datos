@@ -7,7 +7,7 @@ from dash import dash
 import numpy as np
 import pandas as pd
 
-from loaddatatod_db import red_data_mongo
+from loaddatatod_db import red_data_mongo, read_data_mysql
 
 
 class  dashboard():
@@ -26,18 +26,11 @@ class  dashboard():
         else:
             return 0
 
-    def getdata_mysql(self):
-        filter = "{}"
-        cs = red_data_mongo("database", "scrap", {'DEPARTAMENTO': '{}'.format(filter.format(v.capitalize())) } )
-        # cs = red_data_mongo("database","scrap",{'DEPARTAMENTO':'Antioquia'}).limit(1)
-        print(filter.format(v.capitalize()))
-        # print(list(cs))
-        result=list(cs)
+    def getdata_mysql(self,ano,filter):
 
-        if result:
-            return float(result[0][column].replace(",","."))
-        else:
-            return 0
+        query="projecto_datos_abierto."+ano+""+" "+filter+";"
+        return read_data_mysql(query)
+
 
     def generate_table(self,dataframe, page_size=10):
         # return html.Table([
@@ -107,10 +100,16 @@ class  dashboard():
 
         df['AREA'] = df['Name'].apply(lambda x: self.getdata_mongo(x, 'ÁREA (ha)'))
 
-        # print(df.loc[[1]])
+        df_mysql =self.getdata_mysql("2013","")
 
-        # df['importaciones'] = df['Name'].apply(lambda x: print(filter.format(x)) )
+        desired_width = 320
+        pd.set_option('display.width', desired_width)
+        pd.set_option('display.width', 400)
+        pd.set_option('display.max_columns', 22)
 
+        df_mysql_pbk=df_mysql.groupby(['DEPIM'],as_index=False).sum()
+        df_mysql_pbk['DEPIM']= df_mysql_pbk['DEPIM'].astype(str).str.zfill(2)
+        print(df_mysql_pbk)
         fig = px.scatter_geo(
             df,
             locations="id",
@@ -127,15 +126,15 @@ class  dashboard():
         )
 
         fig_imports = px.scatter_geo(
-            df,
-            locations="id",
+            df_mysql_pbk,
+            locations="DEPIM",
             geojson=data,
-            color="DPTO",
+            color="PBK",
             featureidkey="properties.DPTO",
-            hover_name="Name",
+            hover_name="DEPIM",
             center=dict(lat=4.570868, lon=-74.2973328),
             basemap_visible=True,
-            size="PRODUCCION"
+            size="PBK"
             # projection='eckert4'
             # lat="Latitude",
             # lon="Longitude",
