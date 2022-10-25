@@ -1,38 +1,39 @@
 import json
+from random import randrange
 
-from dash import dcc, Output, Input, dash_table
 import dash_html_components as html
-import plotly.express as px
-from dash import dash
 import numpy as np
 import pandas as pd
+import plotly.express as px
+from dash import dash
+from dash import dcc, Output, Input, dash_table
 
 from loaddatatod_db import red_data_mongo, read_data_mysql
 
 
-class  dashboard():
+class dashboard():
+    years = [2013, 2014, 2015, 2016]
+    app = None
 
-
-    def getdata_mongo(self, v,column):
+    def getdata_mongo(self, v, column):
         filter = "{}"
-        cs = red_data_mongo("database", "scrap", {'DEPARTAMENTO': '{}'.format(filter.format(v.capitalize())) } )
+        cs = red_data_mongo("database", "scrap", {'DEPARTAMENTO': '{}'.format(filter.format(v.capitalize()))})
         # cs = red_data_mongo("database","scrap",{'DEPARTAMENTO':'Antioquia'}).limit(1)
         print(filter.format(v.capitalize()))
         # print(list(cs))
-        result=list(cs)
+        result = list(cs)
 
         if result:
-            return float(result[0][column].replace(",","."))
+            return float(result[0][column].replace(",", "."))
         else:
             return 0
 
-    def getdata_mysql(self,ano,filter):
+    def getdata_mysql(self, ano, filter):
 
-        query="projecto_datos_abierto."+ano+""+" "+filter+";"
+        query = "projecto_datos_abierto." + ano + "" + " " + filter + ";"
         return read_data_mysql(query)
 
-
-    def generate_table(self,dataframe, page_size=10):
+    def generate_table(self, dataframe,id, page_size=10,):
         # return html.Table([
         #     html.Thead(
         #         html.Tr([html.Th(col) for col in dataframe.columns])
@@ -44,7 +45,7 @@ class  dashboard():
         #     ])
         # ])
         return dash_table.DataTable(
-            id='dataTable',
+            id=id,
             columns=[{
                 "name": i,
                 "id": i
@@ -53,6 +54,7 @@ class  dashboard():
             page_action="native",
             page_current=0,
             page_size=page_size,
+            style_table={'overflowX': 'auto'},
         )
 
     def dash_on(self):
@@ -61,12 +63,10 @@ class  dashboard():
                 "href": "https://fonts.googleapis.com/css2?"
                         "family=Lato:wght@400;700&display=swap",
                 "rel": "stylesheet",
-            },]
+            }, ]
 
         with open('departments.json', encoding='UTF-8') as f:
             data = json.load(f)
-
-        import plotly.graph_objects as go
 
         # for tile in data['features']:
         #     print(tile['properties']['NOMBRE_DPT'])
@@ -92,25 +92,23 @@ class  dashboard():
 
         df['id'] = df['id'].astype(str)
 
-
-
-        df['PRODUCCION']=df['Name'].apply(lambda x:self.getdata_mongo(x,'PRODUCCIÓN (t)'))
+        df['PRODUCCION'] = df['Name'].apply(lambda x: self.getdata_mongo(x, 'PRODUCCIÓN (t)'))
 
         df['RENDIMIENTO'] = df['Name'].apply(lambda x: self.getdata_mongo(x, 'RENDIMIENTO (t/ha)'))
 
         df['AREA'] = df['Name'].apply(lambda x: self.getdata_mongo(x, 'ÁREA (ha)'))
 
-        df_mysql =self.getdata_mysql("2013","")
+        df_mysql = self.getdata_mysql("2013", "")
 
         desired_width = 320
         pd.set_option('display.width', desired_width)
         pd.set_option('display.width', 400)
         pd.set_option('display.max_columns', 22)
 
-        df_mysql_pbk=df_mysql.groupby(['DEPIM'],as_index=False).sum()
-        df_mysql_pbk['DEPIM']= df_mysql_pbk['DEPIM'].astype(str).str.zfill(2)
-        print(df_mysql_pbk)
-        fig = px.scatter_geo(
+        df_mysql_pbk = df_mysql.groupby(['DEPIM'], as_index=False).sum()
+        df_mysql_pbk['DEPIM'] = df_mysql_pbk['DEPIM'].astype(str).str.zfill(2)
+        # print(df_mysql_pbk)
+        fig = px.choropleth(
             df,
             locations="id",
             geojson=data,
@@ -119,13 +117,13 @@ class  dashboard():
             hover_name="Name",
             center=dict(lat=4.570868, lon=-74.2973328),
             basemap_visible=True,
-            size="PRODUCCION"
+            # size="PRODUCCION"
             # projection='eckert4'
             # lat="Latitude",
             # lon="Longitude",
         )
 
-        fig_imports = px.scatter_geo(
+        fig_imports = px.choropleth(
             df_mysql_pbk,
             locations="DEPIM",
             geojson=data,
@@ -134,7 +132,7 @@ class  dashboard():
             hover_name="DEPIM",
             center=dict(lat=4.570868, lon=-74.2973328),
             basemap_visible=True,
-            size="PBK"
+            # size="PBK"
             # projection='eckert4'
             # lat="Latitude",
             # lon="Longitude",
@@ -166,26 +164,46 @@ class  dashboard():
             )
         )
 
-        app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
+        app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-        _table=app.layout = dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns])
-        app.layout =html.Div(
+        _table = app.layout = dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns])
+        app.layout = html.Div(
             children=[
                 html.Div(
-                children=[
-                    html.P(children="🌽", className="header-emoji"),
-                    html.H1(
-                        children="Colombian Corn Analytics", className="header-title"
-                    ),
-                    html.P(
-                        children="Analyze the behavior of Corn prices"
-                                 " and the number of corn imports vs own prodcttion"
-                                 " between 2016 and 2021",
-                        className="header-description",
-                    ),
-                    html.P(children="🌽", className="header-emoji"),
-                ],
+                    children=[
+                        html.P(children="🌽", className="header-emoji"),
+                        html.H1(
+                            children="Colombian Corn Analytics", className="header-title"
+                        ),
+                        html.P(
+                            children="Analyze the behavior of Corn prices"
+                                     " and the number of corn imports vs own prodcttion"
+                                     " between 2016 and 2021",
+                            className="header-description",
+                        ),
+                        html.P(children="🌽", className="header-emoji"),
+                    ],
                     className="header",
+                ),
+                html.Div(
+                    children=[
+                        html.Div(
+                            children=[
+                                html.Div(children="Años ", className="menu-title"),
+                                dcc.Dropdown(
+                                    id="localidad-filter",
+                                    options=[
+                                        {"label": ano, "value": ano}
+                                        for ano in self.years
+                                    ],
+                                    value="",
+                                    clearable=False,
+                                    className="dropdown",
+                                ),
+                            ]
+                        )
+                    ],
+                    className="",
                 ),
                 html.Div(style={'textAlign': 'Center'}, children=[
                     html.P(children="production", className="header-title"),
@@ -197,8 +215,7 @@ class  dashboard():
 
                 html.Div(style={'textAlign': 'Center'}, children=[
 
-
-                   self.generate_table(df),
+                    self.generate_table(df,"rete1"),
 
                 ]),
                 html.Div(style={'textAlign': 'Center'}, children=[
@@ -208,21 +225,40 @@ class  dashboard():
                         figure=fig_imports,
                     )
                 ]),
+                html.Div(
+                    style={'textAlign': 'Center'},
+                    id="table-imports",
+                    children=[
+
+                        self.generate_table(df_mysql_pbk,"rete"),
+
+                    ]),
 
             ],
             className="wrapper",
         )
 
-
-
-
-
-
-
-
-
-
         app.run_server(debug=True)
+
+
+
+
+
+        @app.callback(
+            Output("table-imports", "children"),
+            [
+                Input("localidad-filter", "value")
+            ],
+        )
+        def update_charts(self,ano):
+
+            df_mysql = self.getdata_mysql(ano, "")
+            df_mysql_pbk = df_mysql.groupby(['DEPIM'], as_index=False).sum()
+            df_mysql_pbk['DEPIM'] = df_mysql_pbk['DEPIM'].astype(str).str.zfill(2)
+
+            return self.generate_table(df_mysql_pbk,"rete")
+
+
 
 if __name__ == '__main__':
     dashboard().dash_on()
