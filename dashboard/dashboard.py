@@ -13,7 +13,20 @@ from loaddatatod_db import red_data_mongo
 class  dashboard():
 
 
-    def getdata(self, v,column):
+    def getdata_mongo(self, v,column):
+        filter = "{}"
+        cs = red_data_mongo("database", "scrap", {'DEPARTAMENTO': '{}'.format(filter.format(v.capitalize())) } )
+        # cs = red_data_mongo("database","scrap",{'DEPARTAMENTO':'Antioquia'}).limit(1)
+        print(filter.format(v.capitalize()))
+        # print(list(cs))
+        result=list(cs)
+
+        if result:
+            return float(result[0][column].replace(",","."))
+        else:
+            return 0
+
+    def getdata_mysql(self):
         filter = "{}"
         cs = red_data_mongo("database", "scrap", {'DEPARTAMENTO': '{}'.format(filter.format(v.capitalize())) } )
         # cs = red_data_mongo("database","scrap",{'DEPARTAMENTO':'Antioquia'}).limit(1)
@@ -88,11 +101,11 @@ class  dashboard():
 
 
 
-        df['PRODUCCION']=df['Name'].apply(lambda x:self.getdata(x,'PRODUCCIÓN (t)'))
+        df['PRODUCCION']=df['Name'].apply(lambda x:self.getdata_mongo(x,'PRODUCCIÓN (t)'))
 
-        df['RENDIMIENTO'] = df['Name'].apply(lambda x: self.getdata(x, 'RENDIMIENTO (t/ha)'))
+        df['RENDIMIENTO'] = df['Name'].apply(lambda x: self.getdata_mongo(x, 'RENDIMIENTO (t/ha)'))
 
-        df['AREA'] = df['Name'].apply(lambda x: self.getdata(x, 'ÁREA (ha)'))
+        df['AREA'] = df['Name'].apply(lambda x: self.getdata_mongo(x, 'ÁREA (ha)'))
 
         # print(df.loc[[1]])
 
