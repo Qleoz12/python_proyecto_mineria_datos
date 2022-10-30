@@ -9,6 +9,8 @@ import unidecode as unidecode
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import Select
 from loaddatatod_db import load_data_mongo
 
@@ -44,7 +46,7 @@ except OSError as e:
     sys.exit("Can't create {dir}: {err}".format(dir=directory, err=e))
 
 
-driver_path = 'driver_selenium\\105_chromedriver.exe'
+driver_path = 'driver_selenium\\chromedriver.exe'
 
 driver = webdriver.Chrome(driver_path, chrome_options=options)
 
@@ -116,17 +118,37 @@ def dataMongo(users,titles,ano):
 
 
 def iterate(xpath_menu_one_row):
+
+    actions = ActionChains(driver)
+    scrollcontainer_web=driver.find_element(By.XPATH,"//div[@class='scroll-element scroll-y scroll-scrolly_visible']/div[@class='scroll-element_outer']/div[@class='scroll-element_track']")
+    actions.move_to_element_with_offset(scrollcontainer_web, 0, 70)
+    actions.click()
+    actions.perform()
+    actions.move_to_element_with_offset(scrollcontainer_web, 0, 70)
+    actions.click()
+    actions.perform()
+
+    time.sleep(1)
+    ele = driver.find_element(By.XPATH,"//div[@class='visibleGroup']/div[@class='row']/div[@class='slicerItemContainer']/span[text() ='2021']")
+    ele.click()
+
+    actions.move_to_element_with_offset(scrollcontainer_web, 0, 0)
+    actions.click()
+    actions.perform()
+
+    actions.move_to_element_with_offset(scrollcontainer_web, 0, -70)
+    actions.click()
+    actions.perform()
+    time.sleep(1)
     years = driver.find_elements("xpath",xpath_menu_one_row)
 
     x_ant = None
     x_act = None
     for i, x in enumerate(years):
-
         print(i, x.text)
-
         x_ant = x
         x_ant = x.click()
-        time.sleep(3)
+        time.sleep(1)
         users = driver.find_elements("xpath", "//div[@class='innerContainer']/div[@class='bodyCells']/div/div")
         titles_xpath = "//div[@class='tableExContainer']/div[@class='tableEx']/div[@class='innerContainer']/div[@class='columnHeaders']/div/div"
         titles = driver.find_elements("xpath", titles_xpath)
@@ -135,23 +157,22 @@ def iterate(xpath_menu_one_row):
         x_act = x
         x_act = x.click()
 
-    time.sleep(3)
+    time.sleep(1)
     years = driver.find_elements("xpath", xpath_menu_one_row)
     years[11].location_once_scrolled_into_view
 
-    time.sleep(3)
+    time.sleep(1)
     years = driver.find_elements("xpath",xpath_menu_one_row)
 
     for i, x in enumerate(years):
         print(i, x.text)
         x_ant = x
         x_ant = x.click()
-        time.sleep(3)
+        time.sleep(1)
         users = driver.find_elements("xpath", "//div[@class='innerContainer']/div[@class='bodyCells']/div/div")
         titles_xpath = "//div[@class='tableExContainer']/div[@class='tableEx']/div[@class='innerContainer']/div[@class='columnHeaders']/div/div"
         titles = driver.find_elements("xpath", titles_xpath)
         dataMongo(users, titles, x.text)
-        time.sleep(1)
         x_act = x
         x_act = x.click()
 

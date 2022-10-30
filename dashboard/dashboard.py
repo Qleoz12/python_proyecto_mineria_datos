@@ -10,6 +10,10 @@ from dash import dcc, Output, Input, dash_table
 
 from loaddatatod_db import red_data_mongo, read_data_mysql
 
+#TODO grafica de historico cantidades por mes y rankings por año
+# el objetivo del movimiento del departamento el que mas importa menos produce
+# estrategias de produccion
+
 
 class dashboard():
     years = [2013, 2014, 2015, 2016]
@@ -127,7 +131,7 @@ class dashboard():
             df_mysql_pbk,
             locations="DEPIM",
             geojson=data,
-            color="PBK",
+            color="PNK",
             featureidkey="properties.DPTO",
             hover_name="DEPIM",
             center=dict(lat=4.570868, lon=-74.2973328),
