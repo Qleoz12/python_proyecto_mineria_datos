@@ -10,8 +10,13 @@ from sqlalchemy import create_engine, types
 import os, sys
 
 engine = create_engine(
-    'mysql://root:root@127.0.0.1:3306/projecto_datos_abierto')  # enter your password and database names here
+    'mysql://root:root@127.0.0.1:3306/projecto_datos_abierto?charset=utf8mb4')  # enter your password and database names here
 
+def find_delimiter(filename):
+    sniffer = csv.Sniffer()
+    with open(filename) as fp:
+        delimiter = sniffer.sniff(fp.read(5000)).delimiter
+    return delimiter
 
 def load_data():
     # Use a breakpoint in the code line below to debug your script.
@@ -24,15 +29,21 @@ def load_data():
         files = glob.glob(folder + "/*.csv")
         for file in files:
             print(file)
+            res=find_delimiter(file)
+            print(res)
             # print(folder[-5:-1])
             df = pd.read_csv(file,
-                             sep=',',
+                             sep=res,
                              encoding='ISO-8859-1',
                              on_bad_lines='warn'
                              )  # Replace Excel_file_name with your excel sheet name
-            df_target = df.query('NABAN == 1005901100')
-            print(df_target.size)
-            df_target.to_sql(folder[-5:-1], con=engine, index=True, if_exists='replace',chunksize=1000)  # Rep
+            df.rename(columns=lambda c: c.replace("ï»¿","") if c.find('ï»¿') else c)
+            if 'NABAN' in df.columns:
+                df_target = df.query('NABAN == 1005901100')
+                print(df_target.size)
+                df_target.to_sql(folder[-5:-1], con=engine, index=True, if_exists='replace',chunksize=500)  # Rep
+            else:
+                print("no encontrado en {}".format(file))
 
 
 def read_data_mysql(mes):
