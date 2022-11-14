@@ -1,14 +1,13 @@
-import json
-from random import randrange
-
 import dash_html_components as html
-import numpy as np
 import pandas as pd
 import plotly.express as px
 from dash import dash
-from dash import dcc, Output, Input, dash_table
+from dash import dcc, dash_table
 
-from loaddatatod_db import red_data_mongo, read_data_mysql
+from dashboard.callnacks_dashboard import register_callbacks
+from dashboard.Utils import generate_table, data_imports
+from loaddatatod_db import read_geojson, getdata_mongo, getdata_mysql
+
 
 #TODO grafica de historico cantidades por mes y rankings por año
 # el objetivo del movimiento del departamento el que mas importa menos produce
@@ -19,47 +18,6 @@ class dashboard():
     years = [2013, 2014, 2015, 2016]
     app = None
 
-    def getdata_mongo(self, v, column):
-        filter = "{}"
-        cs = red_data_mongo("database", "scrap", {'DEPARTAMENTO': '{}'.format(filter.format(v.capitalize()))})
-        # cs = red_data_mongo("database","scrap",{'DEPARTAMENTO':'Antioquia'}).limit(1)
-        print(filter.format(v.capitalize()))
-        # print(list(cs))
-        result = list(cs)
-
-        if result:
-            return float(result[0][column].replace(",", "."))
-        else:
-            return 0
-
-    def getdata_mysql(self, ano, filter):
-
-        query = "projecto_datos_abierto." + ano + "" + " " + filter + ";"
-        return read_data_mysql(query)
-
-    def generate_table(self, dataframe,id, page_size=10,):
-        # return html.Table([
-        #     html.Thead(
-        #         html.Tr([html.Th(col) for col in dataframe.columns])
-        #     ),
-        #     html.Tbody([
-        #         html.Tr([
-        #             html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-        #         ]) for i in range(min(len(dataframe), max_rows))
-        #     ])
-        # ])
-        return dash_table.DataTable(
-            id=id,
-            columns=[{
-                "name": i,
-                "id": i
-            } for i in dataframe.columns],
-            data=dataframe.to_dict('records'),
-            page_action="native",
-            page_current=0,
-            page_size=page_size,
-            style_table={'overflowX': 'auto'},
-        )
 
     def dash_on(self):
         external_stylesheets = [
@@ -69,17 +27,9 @@ class dashboard():
                 "rel": "stylesheet",
             }, ]
 
-        with open('departments.json', encoding='UTF-8') as f:
-            data = json.load(f)
+        geojson=read_geojson()
+        year_default="2013"
 
-        # for tile in data['features']:
-        #     print(tile['properties']['NOMBRE_DPT'])
-        #     print(tile['properties']['DPTO'])
-
-        # data2 = red_data_mongo("database", "scrap", {})
-        #
-        # for x in data2:
-        #     print(x)
 
         list1 = ["05", "08", "11", "13", "15", "17", "18", "19", "20", "23", "25", "27", "41", "44", "47",
                  "50", "52", "54", "63", "66", "68", "70", "73", "76", "81", "85", "86", "91", "94", "95", "97", "99",
@@ -90,24 +40,23 @@ class dashboard():
                  "VALLE DEL CAUCA", "ARAUCA", "CASANARE", "PUTUMAYO", "AMAZONAS", "GUAINIA", "GUAVIARE", "VAUPES",
                  "VICHADA",
                  "ARCHIPIELAGO DE SAN ANDRES PROVIDENCIA Y SANTA CATALINA"]
-        list2 = [(np.random.randn() + 3) * 100 for i in range(33)]
-        df = pd.DataFrame(list(zip(list1, list2, list3)),
-                          columns=['id', "DPTO", "Name"])
 
+        df = pd.DataFrame(list(zip(list1, list3)),columns=['id', "Name"])
         df['id'] = df['id'].astype(str)
 
-        df['PRODUCCION'] = df['Name'].apply(lambda x: self.getdata_mongo(x, 'PRODUCCIÓN (t)'))
+        df['PRODUCCION'] = df['Name'].apply(lambda x: getdata_mongo(x, 'PRODUCCIÓN (t)',year_default))
 
-        df['RENDIMIENTO'] = df['Name'].apply(lambda x: self.getdata_mongo(x, 'RENDIMIENTO (t/ha)'))
+        df['RENDIMIENTO'] = df['Name'].apply(lambda x: getdata_mongo(x, 'RENDIMIENTO (t/ha)',year_default))
 
-        df['AREA'] = df['Name'].apply(lambda x: self.getdata_mongo(x, 'ÁREA (ha)'))
+        df['AREA'] = df['Name'].apply(lambda x: getdata_mongo(x, 'ÁREA (ha)',year_default))
 
-        df_mysql = self.getdata_mysql("2013", "")
+        df_mysql = getdata_mysql("2013", "")
 
         desired_width = 320
         pd.set_option('display.width', desired_width)
         pd.set_option('display.width', 400)
         pd.set_option('display.max_columns', 22)
+
 
         df_mysql_pbk = df_mysql.groupby(['DEPIM'], as_index=False).sum()
         df_mysql_pbk['DEPIM'] = df_mysql_pbk['DEPIM'].astype(str).str.zfill(2)
@@ -115,8 +64,8 @@ class dashboard():
         fig = px.choropleth(
             df,
             locations="id",
-            geojson=data,
-            color="DPTO",
+            geojson=geojson,
+            color="RENDIMIENTO",
             featureidkey="properties.DPTO",
             hover_name="Name",
             center=dict(lat=4.570868, lon=-74.2973328),
@@ -130,7 +79,7 @@ class dashboard():
         fig_imports = px.choropleth(
             df_mysql_pbk,
             locations="DEPIM",
-            geojson=data,
+            geojson=geojson,
             color="PNK",
             featureidkey="properties.DPTO",
             hover_name="DEPIM",
@@ -169,6 +118,7 @@ class dashboard():
         )
 
         app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+        register_callbacks(app)
 
         _table = app.layout = dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns])
         app.layout = html.Div(
@@ -200,7 +150,7 @@ class dashboard():
                                         {"label": ano, "value": ano}
                                         for ano in self.years
                                     ],
-                                    value="",
+                                    value="2013",
                                     clearable=False,
                                     className="dropdown",
                                 ),
@@ -217,11 +167,9 @@ class dashboard():
                     )
                 ]),
 
-                html.Div(style={'textAlign': 'Center'}, children=[
-
-                    self.generate_table(df,"rete1"),
-
-                ]),
+                html.Div(style={'textAlign': 'Center'},
+                         id="table-productions",
+                         children=[]),
                 html.Div(style={'textAlign': 'Center'}, children=[
                     html.P(children="importations", className="header-title"),
                     dcc.Graph(
@@ -232,15 +180,14 @@ class dashboard():
                 html.Div(
                     style={'textAlign': 'Center'},
                     id="table-imports",
-                    children=[
-
-                        self.generate_table(df_mysql_pbk,"rete"),
-
-                    ]),
+                    children=[]),
 
             ],
             className="wrapper",
         )
+
+
+
 
         app.run_server(debug=True)
 
@@ -248,19 +195,7 @@ class dashboard():
 
 
 
-        @app.callback(
-            Output("table-imports", "children"),
-            [
-                Input("localidad-filter", "value")
-            ],
-        )
-        def update_charts(self,ano):
 
-            df_mysql = self.getdata_mysql(ano, "")
-            df_mysql_pbk = df_mysql.groupby(['DEPIM'], as_index=False).sum()
-            df_mysql_pbk['DEPIM'] = df_mysql_pbk['DEPIM'].astype(str).str.zfill(2)
-
-            return self.generate_table(df_mysql_pbk,"rete")
 
 
 

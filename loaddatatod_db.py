@@ -1,5 +1,6 @@
 import csv
 import glob
+import json
 from difflib import get_close_matches
 from typing import final
 
@@ -19,13 +20,10 @@ def find_delimiter(filename):
     return delimiter
 
 def load_data():
-    # Use a breakpoint in the code line below to debug your script.
-
     path = "D:/U/mineria/Impo/*/"
     dirs = glob.glob(path)
 
     for folder in dirs:
-
         files = glob.glob(folder + "/*.csv")
         for file in files:
             print(file)
@@ -66,7 +64,7 @@ def red_data_sqlserver():
     return df
 
 
-def red_data_mongo(database, colletion, query):
+def read_data_mongo(database, colletion, query):
     try:
         conn = conn_mongo()
         db = conn[database]
@@ -110,6 +108,38 @@ def conn_mongo():
         print('Error with MongoDB connection: %s' % error)
     except pymongo.errors.ConnectionFailure as error:
         print('Could not connect to MongoDB: %s' % error)
+
+def read_geojson():
+    try:
+        # Opening JSON file
+        f = open('../departments.json', encoding='UTF-8')
+        # returns JSON object as
+        # a dictionary
+        data = json.load(f)
+
+        return data
+    except:
+        print("error loading geojson")
+
+def getdata_mongo(v, column,year):
+    filter = "{}"
+    YEAR="{}"
+    query= {'DEPARTAMENTO': {"$regex" : '{}'.format(filter.format(v))}, 'AÑO': '{}'.format(YEAR.format(year))}
+    print(query)
+    cs = read_data_mongo("database", "scrap",query)
+    # cs = red_data_mongo("database","scrap",{'DEPARTAMENTO':'Antioquia'}).limit(1)
+    print(filter.format(v.capitalize()))
+    # print(list(cs))
+    result = list(cs)
+    if result:
+        return float(result[0][column].replace(",", "."))
+    else:
+        return 0
+
+def getdata_mysql(ano, filter):
+
+    query = "projecto_datos_abierto." + str(ano) + "" + " " + filter + ";"
+    return read_data_mysql(query)
 
 
 if __name__ == '__main__':
