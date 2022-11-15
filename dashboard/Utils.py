@@ -34,12 +34,31 @@ def data_imports(df):
                           "52": "NARIÑO", "54": "NORTE DE SANTANDER", "86": "PUTUMAYO", "63": "QUINDIO",
                           "66": "RISARALDA", "88": "SAN ANDRES", "11": "SANTAFE DE BOGOTA", "68": "SANTANDER",
                           "70": "SUCRE", "73": "TOLIMA", "76": "VALLE DEL CAUCA", "97": "VAUPES", "99": "VICHADA"}
+    origin=df
+    df = df.groupby(['DEPIM', 'DEPTODES'], as_index=False).sum()
 
-    df['Name'] = df['DEPIM'].apply(lambda x: imports_departmens.get(x))
+    df['DEPIM'] = df['DEPIM'].astype(str).str.zfill(2)
+    df['DEPTODES'] = df['DEPTODES'].astype(str).str.zfill(2)
+    df['DEPARTAMENTO'] = df['DEPIM'].apply(lambda x: imports_departmens.get(x))
+    df['DEPARTAMENTO DESTINO'] = df['DEPTODES'].apply(lambda x: imports_departmens.get(x))
+    df['PESO TONELADAS'] = df['DEPTODES'].apply(lambda x: imports_departmens.get(x))
+
+    df['PESO TONELADAS'] = df['PNK'].apply(lambda x: x/1000)
+
     cols = df.columns.tolist()
+
     id = cols[0]
-    cols = cols[-1:] + cols[1:-1]
+    cols=[]
+    # cols = cols[-1:] + cols[1:-1]
     cols.insert(0, id)
+    cols.append("DEPARTAMENTO")
+    cols.append("DEPTODES")
+    cols.append("DEPARTAMENTO DESTINO")
+    cols.append("PBK")
+    cols.append("PNK")
+    cols.append("PESO TONELADAS")
+
     df = df[cols]
+    df = df.sort_values(by=['PNK'], ascending=False)
 
     return df

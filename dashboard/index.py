@@ -2,10 +2,10 @@ import dash_html_components as html
 import pandas as pd
 import plotly.express as px
 from dash import dash
+import dash_bootstrap_components as dbc
 from dash import dcc, dash_table
 
 from dashboard.callnacks_dashboard import register_callbacks
-from dashboard.Utils import generate_table, data_imports
 from loaddatatod_db import read_geojson, getdata_mongo, getdata_mysql
 
 
@@ -15,17 +15,19 @@ from loaddatatod_db import read_geojson, getdata_mongo, getdata_mysql
 
 
 class dashboard():
-    years = [2013, 2014, 2015, 2016]
+    years = range(2012, 2022)
     app = None
 
 
     def dash_on(self):
-        external_stylesheets = [
+        external_stylesheets = \
+            [
             {
                 "href": "https://fonts.googleapis.com/css2?"
                         "family=Lato:wght@400;700&display=swap",
                 "rel": "stylesheet",
-            }, ]
+            },
+        ]
 
         geojson=read_geojson()
         year_default="2013"
@@ -159,6 +161,11 @@ class dashboard():
                     ],
                     className="",
                 ),
+                dbc.Row(id="row-statics",children=[
+                    dbc.Col(id="row-statics-a"),
+                    dbc.Col(id="row-statics-b"),
+                ], style={"display": "flex",
+                          "justify-content": "center"}),
                 html.Div(style={'textAlign': 'Center'}, children=[
                     html.P(children="production", className="header-title"),
                     dcc.Graph(
