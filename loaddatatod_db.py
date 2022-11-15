@@ -125,10 +125,10 @@ def getdata_mongo(v, column,year):
     filter = "{}"
     YEAR="{}"
     query= {'DEPARTAMENTO': {"$regex" : '{}'.format(filter.format(v))}, 'AÑO': '{}'.format(YEAR.format(year))}
-    print(query)
+    # print(query)
     cs = read_data_mongo("database", "scrap",query)
     # cs = red_data_mongo("database","scrap",{'DEPARTAMENTO':'Antioquia'}).limit(1)
-    print(filter.format(v.capitalize()))
+    # print(filter.format(v.capitalize()))
     # print(list(cs))
     result = list(cs)
     if result:
