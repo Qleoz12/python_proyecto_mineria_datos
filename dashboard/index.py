@@ -9,7 +9,7 @@ from dashboard.callnacks_dashboard import register_callbacks
 from loaddatatod_db import read_geojson, getdata_mongo, getdata_mysql
 
 
-#TODO grafica de historico cantidades por mes y rankings por año
+# TODO grafica de historico cantidades por mes y rankings por año
 # el objetivo del movimiento del departamento el que mas importa menos produce
 # estrategias de produccion
 
@@ -18,20 +18,18 @@ class dashboard():
     years = range(2012, 2022)
     app = None
 
-
     def dash_on(self):
         external_stylesheets = \
             [
-            {
-                "href": "https://fonts.googleapis.com/css2?"
-                        "family=Lato:wght@400;700&display=swap",
-                "rel": "stylesheet",
-            },
-        ]
+                {
+                    "href": "https://fonts.googleapis.com/css2?"
+                            "family=Lato:wght@400;700&display=swap",
+                    "rel": "stylesheet",
+                },
+            ]
 
-        geojson=read_geojson()
-        year_default="2013"
-
+        geojson = read_geojson()
+        year_default = "2013"
 
         list1 = ["05", "08", "11", "13", "15", "17", "18", "19", "20", "23", "25", "27", "41", "44", "47",
                  "50", "52", "54", "63", "66", "68", "70", "73", "76", "81", "85", "86", "91", "94", "95", "97", "99",
@@ -43,14 +41,14 @@ class dashboard():
                  "VICHADA",
                  "ARCHIPIELAGO DE SAN ANDRES PROVIDENCIA Y SANTA CATALINA"]
 
-        df = pd.DataFrame(list(zip(list1, list3)),columns=['id', "Name"])
+        df = pd.DataFrame(list(zip(list1, list3)), columns=['id', "Name"])
         df['id'] = df['id'].astype(str)
 
-        df['PRODUCCION'] = df['Name'].apply(lambda x: getdata_mongo(x, 'PRODUCCIÓN (t)',year_default))
+        df['PRODUCCION'] = df['Name'].apply(lambda x: getdata_mongo(x, 'PRODUCCIÓN (t)', year_default))
 
-        df['RENDIMIENTO'] = df['Name'].apply(lambda x: getdata_mongo(x, 'RENDIMIENTO (t/ha)',year_default))
+        df['RENDIMIENTO'] = df['Name'].apply(lambda x: getdata_mongo(x, 'RENDIMIENTO (t/ha)', year_default))
 
-        df['AREA'] = df['Name'].apply(lambda x: getdata_mongo(x, 'ÁREA (ha)',year_default))
+        df['AREA'] = df['Name'].apply(lambda x: getdata_mongo(x, 'ÁREA (ha)', year_default))
 
         df_mysql = getdata_mysql("2013", "")
 
@@ -59,65 +57,12 @@ class dashboard():
         pd.set_option('display.width', 400)
         pd.set_option('display.max_columns', 22)
 
-
         df_mysql_pbk = df_mysql.groupby(['DEPIM'], as_index=False).sum()
         df_mysql_pbk['DEPIM'] = df_mysql_pbk['DEPIM'].astype(str).str.zfill(2)
         # print(df_mysql_pbk)
-        fig = px.choropleth(
-            df,
-            locations="id",
-            geojson=geojson,
-            color="RENDIMIENTO",
-            featureidkey="properties.DPTO",
-            hover_name="Name",
-            center=dict(lat=4.570868, lon=-74.2973328),
-            basemap_visible=True,
-            # size="PRODUCCION"
-            # projection='eckert4'
-            # lat="Latitude",
-            # lon="Longitude",
-        )
 
-        fig_imports = px.choropleth(
-            df_mysql_pbk,
-            locations="DEPIM",
-            geojson=geojson,
-            color="PNK",
-            featureidkey="properties.DPTO",
-            hover_name="DEPIM",
-            center=dict(lat=4.570868, lon=-74.2973328),
-            basemap_visible=True,
-            # size="PBK"
-            # projection='eckert4'
-            # lat="Latitude",
-            # lon="Longitude",
-        )
 
-        fig.update_layout(
-            autosize=True,
-            height=600,
-            geo=dict(
-                center=dict(
-                    lat=4.570868,
-                    lon=-74.2973328
-                ),
-                scope='south america',
-                projection_scale=6
-            )
-        )
 
-        fig_imports.update_layout(
-            autosize=True,
-            height=600,
-            geo=dict(
-                center=dict(
-                    lat=4.570868,
-                    lon=-74.2973328
-                ),
-                scope='south america',
-                projection_scale=6
-            )
-        )
 
         app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
         register_callbacks(app)
@@ -161,7 +106,7 @@ class dashboard():
                     ],
                     className="",
                 ),
-                dbc.Row(id="row-statics",children=[
+                dbc.Row(id="row-statics", children=[
                     dbc.Col(id="row-statics-a"),
                     dbc.Col(id="row-statics-b"),
                 ], style={"display": "flex",
@@ -169,8 +114,8 @@ class dashboard():
                 html.Div(style={'textAlign': 'Center'}, children=[
                     html.P(children="production", className="header-title"),
                     dcc.Graph(
+                        id="figure-productions",
                         style={"height": "50vh"},
-                        figure=fig,
                     )
                 ]),
 
@@ -181,7 +126,7 @@ class dashboard():
                     html.P(children="importations", className="header-title"),
                     dcc.Graph(
                         style={"height": "50vh"},
-                        figure=fig_imports,
+                        id="figure-imports",
                     )
                 ]),
                 html.Div(
@@ -193,17 +138,7 @@ class dashboard():
             className="wrapper",
         )
 
-
-
-
         app.run_server(debug=True)
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
